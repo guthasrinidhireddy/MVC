@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HealthBook — Healthcare Appointment Booking</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8fafc; }
+    .card { border-radius: 1rem; }
+    .navbar-brand { font-weight: 600; font-size: 1.25rem; }
+    footer { margin-top: 3rem; text-align: center; color: #888; }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="#">HealthBook</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#doctors">Doctors</a></li>
+        <li class="nav-item"><a class="nav-link" href="#appointments">Appointments</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Doctors Section -->
+  <section id="doctors" class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h4">Available Doctors</h2>
+      <a href="#appointments" class="btn btn-primary">Book Appointment</a>
+    </div>
+    <div id="doctor-list" class="row"></div>
+  </section>
+
+  <!-- Appointment Form + List -->
+  <section id="appointments" class="mb-5">
+    <div class="row">
+      <div class="col-lg-6 mb-4">
+        <h2 class="h5 mb-3">Book an Appointment</h2>
+        <form id="booking-form">
+          <div class="mb-3">
+            <label class="form-label">Patient Name</label>
+            <input type="text" id="patient-name" class="form-control" placeholder="Enter your name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Select Doctor</label>
+            <select id="doctor-select" class="form-select" required></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Start Time</label>
+            <input type="datetime-local" id="appointment-time" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100">Confirm Appointment</button>
+        </form>
+      </div>
+
+      <div class="col-lg-6">
+        <h2 class="h5 mb-3">Upcoming Appointments</h2>
+        <ul id="appointment-list" class="list-group"></ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <p>© 2025 HealthBook | Static MVC Demo</p>
+</footer>
+
+<!-- JS -->
+<script>
+const doctors = [
+  { id: 1, name: "Dr. Asha Patel", specialty: "Cardiology" },
+  { id: 2, name: "Dr. Raj Kumar", specialty: "Pediatrics" },
+  { id: 3, name: "Dr. Meena Das", specialty: "Dermatology" },
+];
+
+const appointments = [];
+
+function renderDoctors() {
+  const list = document.getElementById('doctor-list');
+  list.innerHTML = '';
+  doctors.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'col-md-4';
+    card.innerHTML = `
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <h5 class="card-title">${d.name}</h5>
+          <p class="card-text text-muted">${d.specialty}</p>
+          <a href="#appointments" class="btn btn-outline-primary btn-sm" onclick="selectDoctor(${d.id})">
+            Book with ${d.name.split(' ')[1]}
+          </a>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function populateDoctorDropdown() {
+  const select = document.getElementById('doctor-select');
+  select.innerHTML = '<option value="">Choose doctor</option>';
+  doctors.forEach(d => {
+    const option = document.createElement('option');
+    option.value = d.id;
+    option.textContent = `${d.name} — ${d.specialty}`;
+    select.appendChild(option);
+  });
+}
+
+function selectDoctor(id) {
+  document.getElementById('doctor-select').value = id;
+}
+
+function renderAppointments() {
+  const list = document.getElementById('appointment-list');
+  list.innerHTML = '';
+  if (appointments.length === 0) {
+    list.innerHTML = '<li class="list-group-item text-muted">No appointments yet.</li>';
+  } else {
+    appointments.forEach(a => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item d-flex justify-content-between align-items-start';
+      li.innerHTML = `
+        <div>
+          <div><strong>${a.patient}</strong> with <em>${a.doctor.name}</em></div>
+          <small class="text-muted">${new Date(a.time).toLocaleString()}</small>
+        </div>
+        <span class="badge bg-primary">${a.doctor.specialty}</span>
+      `;
+      list.appendChild(li);
+    });
+  }
+}
+
+document.getElementById('booking-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const patient = document.getElementById('patient-name').value.trim();
+  const doctorId = parseInt(document.getElementById('doctor-select').value);
+  const time = document.getElementById('appointment-time').value;
+  if (!patient || !doctorId || !time) return alert('Please fill all fields.');
+
+  const doctor = doctors.find(d => d.id === doctorId);
+  appointments.push({ patient, doctor, time });
+  renderAppointments();
+  e.target.reset();
+  alert('Appointment booked successfully!');
+});
+
+window.onload = () => {
+  renderDoctors();
+  populateDoctorDropdown();
+  renderAppointments();
+};
+</script>
+
+</body>
+</html>
